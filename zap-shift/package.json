@@ -1,5 +1,5 @@
 {
-  "name": "dragon-news-code",
+  "name": "zap-shift",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -18,8 +18,11 @@
     "react-dom": "^18.2.0",
     "react-fast-marquee": "^1.6.5",
     "react-icons": "^5.6.0",
+    "react-leaflet": "^4.2.1",
+    "react-responsive-carousel": "^3.2.23",
     "react-router": "^7.13.2",
     "react-router-dom": "^7.13.2",
+    "swiper": "^12.1.3",
     "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
