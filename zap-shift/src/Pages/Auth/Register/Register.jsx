@@ -1,5 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import useAuth from "../../../Hooks/useAuth";
 
 const Register = () => {
   const {
@@ -7,9 +8,14 @@ const Register = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-
+  const { createUser } = useAuth();
   const handleRegistration = (data) => {
     console.log(data);
+    createUser(data.email, data.password)
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => console.log(err));
   };
   return (
     <div>
@@ -30,7 +36,7 @@ const Register = () => {
             type="password"
             className="input"
             placeholder="Password"
-          /> 
+          />
           {errors.password?.type === "required" && <p>Password Required</p>}
           {/* {errors.password?.type === "pattern" && <p>Password must have lowercase...</p>}  you can use regex for password */}
           {errors.password?.type === "minLength" && (
@@ -39,7 +45,7 @@ const Register = () => {
           <div>
             <a className="link link-hover">Forgot password?</a>
           </div>
-          <button className="btn btn-neutral mt-4">Login</button>
+          <button className="btn btn-neutral mt-4">Register</button>
         </fieldset>
       </form>
     </div>
