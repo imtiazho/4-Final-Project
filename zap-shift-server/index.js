@@ -63,7 +63,39 @@ async function run() {
       res.send(result);
     });
 
-    // payment
+    // payment APIS
+
+    // Halka change and new
+    app.post("/payment-checkout", async (req, res) => {
+      const paymentInfo = req.body;
+      const amount = parseInt(paymentInfo.cost) * 100;
+      const session = await stripe.checkout.sessions.create({
+        success_url: "https://example.com/success",
+        line_items: [
+          {
+            price_data: {
+              currency: "USD",
+              unit_amount: amount,
+              product_data: {
+                name: `Please pay for ${paymentInfo.parcelName}!`,
+              },
+            },
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        metadata: {
+          parcelId: paymentInfo.parcelId,
+        },
+        customer_email: paymentInfo.senderEmail,
+        success_url: `${process.env.SITE_DOMAIN}/dashboard/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.SITE_DOMAIN}/dashboard/payment-cancelled`,
+      });
+
+      res.send({ url: session.url });
+    });
+
+    // Old
     app.post("/create-checkout-session", async (req, res) => {
       const paymentInfo = req.body;
       const amount = parseInt(paymentInfo.cost) * 100;
@@ -91,6 +123,23 @@ async function run() {
 
       console.log(session.url);
       res.send({ url: session.url });
+    });
+
+    app.patch("/verify-payment", async (req, res) => {
+      const sessionID = req.query.session_id;
+      const session = await stripe.checkout.sessions.retrieve(sessionID);
+      if (session.payment_status == "paid") {
+        const id = session.metadata.parcelId;
+        const query = { _id: new ObjectId(id) };
+        const update = {
+          $set: {
+            paymentStatus: "paid",
+          },
+        };
+        const result = await parcelsCollections.updateOne(query, update);
+        res.send({ success: true });
+      }
+      res.send({ success: false });
     });
 
     // Send a ping to confirm a successful connection
