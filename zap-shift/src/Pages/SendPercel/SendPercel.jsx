@@ -51,6 +51,8 @@ const SendPercel = () => {
       }
     }
 
+    data.cost = cost;
+
     Swal.fire({
       title: "Are you agree with the cost?",
       text: `You will be charged ${cost} Taka`,
