@@ -1,7 +1,7 @@
 import React from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { FaCircle, FaRegCircle } from "react-icons/fa";
-import { useLoaderData } from "react-router";
+import { useLoaderData, useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../../Hooks/useAxiosSecure";
 import useAuth from "../../Hooks/useAuth";
@@ -16,6 +16,7 @@ const SendPercel = () => {
   } = useForm();
 
   const { user } = useAuth();
+  const navigate = useNavigate();
   const axiosSecure = useAxiosSecure();
   const serviceCenter = useLoaderData();
   const regionsDuplicate = serviceCenter.map((s) => s.region);
@@ -64,15 +65,16 @@ const SendPercel = () => {
     }).then((result) => {
       if (result.isConfirmed)
         // Send it to database via server
-        axiosSecure.post("/parcels", data).then((res) => {
-          if (res.data.acknowledged) {
-            Swal.fire({
-              title: "Deleted!",
-              text: "Your file has been deleted.",
-              icon: "success",
-            });
-          }
-        });
+        navigate("/dashboard/my-parcel");
+      axiosSecure.post("/parcels", data).then((res) => {
+        if (res.data.acknowledged) {
+          Swal.fire({
+            title: "Deleted!",
+            text: "Your file has been deleted.",
+            icon: "success",
+          });
+        }
+      });
     });
   };
 

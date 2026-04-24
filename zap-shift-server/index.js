@@ -7,6 +7,8 @@ require("dotenv").config();
 const dns = require("dns");
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
+const generateTrackingId = () => {};
+
 // Middleware
 app.use(express.json());
 app.use(cors());
@@ -28,6 +30,7 @@ async function run() {
     await client.connect();
     const db = client.db("zap_shift_db");
     const parcelsCollections = db.collection("parcels");
+    const paymentCollections = db.collection("payments");
 
     app.get("/parcels", async (req, res) => {
       const query = {};
@@ -86,6 +89,7 @@ async function run() {
         mode: "payment",
         metadata: {
           parcelId: paymentInfo.parcelId,
+          parcelName: paymentInfo.parcelName,
         },
         customer_email: paymentInfo.senderEmail,
         success_url: `${process.env.SITE_DOMAIN}/dashboard/payment-success?session_id={CHECKOUT_SESSION_ID}`,
@@ -134,11 +138,31 @@ async function run() {
         const update = {
           $set: {
             paymentStatus: "paid",
+            trackingID: generateTrackingId(),
           },
         };
         const result = await parcelsCollections.updateOne(query, update);
-        res.send({ success: true });
+        const paymentHistory = {
+          amount: session.amount_total / 100,
+          currency: session.currency,
+          customer_email: session.customer_email,
+          parcelId: session.metadata.parcelId,
+          parcelName: session.metadata.parcelName,
+          transactionId: session.payment_intent,
+          paymentStatus: session.payment_status,
+          paidAt: new Date(),
+        };
+        
+        if (session.payment_status === "paid") {
+          const resPay = await paymentCollections.insertOne(paymentHistory);
+          res.send({
+            success: true,
+            modifyParcel: result,
+            paymentInfo: resPay,
+          });
+        }
       }
+
       res.send({ success: false });
     });
 

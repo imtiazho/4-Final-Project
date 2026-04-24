@@ -3,10 +3,11 @@ import React from "react";
 import useAuth from "../../../Hooks/useAuth";
 import useAxiosSecure from "../../../Hooks/useAxiosSecure";
 import Swal from "sweetalert2";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 const MyParcels = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const axiosSecure = useAxiosSecure();
   const { data: parcels = [], refetch } = useQuery({
     queryKey: ["myParcels", user?.email],
