@@ -20,9 +20,16 @@ const NavBar = () => {
       <li>
         <NavLink to="/coverage">Coverage</NavLink>
       </li>
-      <li>
-        <NavLink to="/send-parcel">Send Percel</NavLink>
-      </li>
+      {user && (
+        <>
+          <li>
+            <NavLink to="/send-parcel">Send Percel</NavLink>
+          </li>
+          <li>
+            <NavLink to="/dashboard/my-parcel">My Parcels</NavLink>
+          </li>
+        </>
+      )}
     </>
   );
   return (
@@ -61,14 +68,20 @@ const NavBar = () => {
         </div>
         <div className="navbar-end">
           {user ? (
-            <button onClick={handleSignOut} className="btn btn-primary">SignOut</button>
+            <button onClick={handleSignOut} className="btn btn-primary">
+              SignOut
+            </button>
           ) : (
             <div>
-              <Link className="btn btn-primary" to="/login">Login</Link>
+              <Link className="btn btn-primary" to="/login">
+                Login
+              </Link>
             </div>
           )}
 
-          <Link className="btn btn-primary mx-2" to='/be-a-rider'>Be a rider</Link>
+          <Link className="btn btn-primary mx-2" to="/be-a-rider">
+            Be a rider
+          </Link>
         </div>
       </div>
     </div>
