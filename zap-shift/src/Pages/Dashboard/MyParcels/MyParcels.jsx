@@ -3,6 +3,7 @@ import React from "react";
 import useAuth from "../../../Hooks/useAuth";
 import useAxiosSecure from "../../../Hooks/useAxiosSecure";
 import Swal from "sweetalert2";
+import { Link } from "react-router";
 
 const MyParcels = () => {
   const { user } = useAuth();
@@ -29,7 +30,7 @@ const MyParcels = () => {
         // Send it to database via server
         axiosSecure.delete(`/parcels/${id}`).then((res) => {
           if (res.data.deletedCount) {
-            // Refresh the data 
+            // Refresh the data
             refetch();
             Swal.fire({
               title: "Deleted!",
@@ -52,6 +53,7 @@ const MyParcels = () => {
               <th>Name</th>
               <th>Cost</th>
               <th>Payment Status</th>
+              <th>Delivery Status</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -61,7 +63,19 @@ const MyParcels = () => {
                 <th>{index + 1}</th>
                 <td>{parcel?.parcelName}</td>
                 <td>{parcel?.cost || "None"}</td>
-                <td>{}</td>
+                <td>
+                  {parcel?.paymentStatus == "paid" ? (
+                    <span className="text-green-400">Paid</span>
+                  ) : (
+                    <Link
+                      to={`/dashboard/payment/${parcel._id}`}
+                      className="btn btn-primary"
+                    >
+                      Pay
+                    </Link>
+                  )}
+                </td>
+                <td>{parcel?.deliverStatus}</td>
                 <td className="flex gap-2">
                   <button className="btn btn-primary">Edit</button>
                   <button className="btn btn-primary">View</button>
