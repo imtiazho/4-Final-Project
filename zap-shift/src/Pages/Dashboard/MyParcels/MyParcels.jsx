@@ -71,7 +71,7 @@ const MyParcels = () => {
                       to={`/dashboard/payment/${parcel._id}`}
                       className="btn btn-primary"
                     >
-                      Pay
+                      Pay Now
                     </Link>
                   )}
                 </td>
