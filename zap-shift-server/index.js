@@ -5,9 +5,16 @@ const app = express();
 const port = process.env.PORT || 5000;
 require("dotenv").config();
 const dns = require("dns");
+const crypto = require("crypto");
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
-const generateTrackingId = () => {};
+const generateTrackingId = () => {
+  const prefix = "IMTI";
+  const date = new Date().toDateString().slice(0, 10).replace(/-/g, "");
+  const random = crypto.randomBytes(3).toString("hex").toUpperCase();
+
+  return `${prefix}-${date}-${random}`;
+};
 
 // Middleware
 app.use(express.json());
@@ -68,12 +75,11 @@ async function run() {
 
     // payment APIS
 
-    // Halka change and new
+    // Slightly Change but same jinish in differently
     app.post("/payment-checkout", async (req, res) => {
       const paymentInfo = req.body;
       const amount = parseInt(paymentInfo.cost) * 100;
       const session = await stripe.checkout.sessions.create({
-        success_url: "https://example.com/success",
         line_items: [
           {
             price_data: {
@@ -132,13 +138,14 @@ async function run() {
     app.patch("/verify-payment", async (req, res) => {
       const sessionID = req.query.session_id;
       const session = await stripe.checkout.sessions.retrieve(sessionID);
+      const trackingID = generateTrackingId();
       if (session.payment_status == "paid") {
         const id = session.metadata.parcelId;
         const query = { _id: new ObjectId(id) };
         const update = {
           $set: {
             paymentStatus: "paid",
-            trackingID: generateTrackingId(),
+            trackingID: trackingID,
           },
         };
         const result = await parcelsCollections.updateOne(query, update);
@@ -152,13 +159,15 @@ async function run() {
           paymentStatus: session.payment_status,
           paidAt: new Date(),
         };
-        
+
         if (session.payment_status === "paid") {
           const resPay = await paymentCollections.insertOne(paymentHistory);
           res.send({
             success: true,
             modifyParcel: result,
+            trackingID: trackingID,
             paymentInfo: resPay,
+            transactionId: session.payment_intent,
           });
         }
       }
