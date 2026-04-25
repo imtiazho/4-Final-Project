@@ -74,7 +74,6 @@ async function run() {
     });
 
     // payment APIS
-
     // Slightly Change but same jinish in differently
     app.post("/payment-checkout", async (req, res) => {
       const paymentInfo = req.body;
@@ -138,6 +137,18 @@ async function run() {
     app.patch("/verify-payment", async (req, res) => {
       const sessionID = req.query.session_id;
       const session = await stripe.checkout.sessions.retrieve(sessionID);
+
+      const transactionId = session.payment_intent;
+      const query = { transactionId: transactionId };
+      const paymentExist = await paymentCollections.findOne(query);
+      if (paymentExist) {
+        return res.send({
+          message: "Already exist payment track",
+          transactionId,
+          trackingID: paymentExist.trackingID,
+        });
+      }
+
       const trackingID = generateTrackingId();
       if (session.payment_status == "paid") {
         const id = session.metadata.parcelId;
@@ -158,6 +169,7 @@ async function run() {
           transactionId: session.payment_intent,
           paymentStatus: session.payment_status,
           paidAt: new Date(),
+          trackingID: trackingID,
         };
 
         if (session.payment_status === "paid") {
@@ -175,6 +187,18 @@ async function run() {
       res.send({ success: false });
     });
 
+    //
+    app.get("/payments", async (req, res) => {
+      const email = req.query.email;
+      const query = {};
+      if (email) {
+        query.customer_email = email;
+      }
+
+      const cursor = paymentCollections.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(

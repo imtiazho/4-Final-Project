@@ -42,7 +42,7 @@ const MyParcels = () => {
         });
     });
   };
-
+  console.log(user.email);
   const handlePayment = async (parcel) => {
     const paymentInfo = {
       cost: parcel.cost,
