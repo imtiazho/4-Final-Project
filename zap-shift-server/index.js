@@ -7,6 +7,13 @@ require("dotenv").config();
 const dns = require("dns");
 const crypto = require("crypto");
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
+const admin = require("firebase-admin");
+
+const serviceAccount = require("./zap-shift-service-key.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 const generateTrackingId = () => {
   const prefix = "IMTI";
@@ -19,6 +26,22 @@ const generateTrackingId = () => {
 // Middleware
 app.use(express.json());
 app.use(cors());
+
+const verifyFireBaseToken = async (req, res, next) => {
+  const token = req.headers.authorization;
+  if (!token) {
+    return res.status(401).send({ message: "Unauthorized Access" });
+  }
+
+  try {
+    const idToken = token.split(" ")[1];
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    req.decoded_email = decoded.email;
+    next();
+  } catch (err) {
+    return res.status(401).send({ message: "Unauthorized Access" });
+  }
+};
 
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ab3rgue.mongodb.net/?appName=Cluster0`;
@@ -188,17 +211,24 @@ async function run() {
     });
 
     //
-    app.get("/payments", async (req, res) => {
+    app.get("/payments", verifyFireBaseToken, async (req, res) => {
       const email = req.query.email;
       const query = {};
       if (email) {
         query.customer_email = email;
+
+        // Check email address of user
+        if (email !== req.decoded_email) {
+          return res.status(403).send({ message: "Forbidden Access" });
+        }
+
       }
 
       const cursor = paymentCollections.find(query);
       const result = await cursor.toArray();
       res.send(result);
     });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
