@@ -59,8 +59,24 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const db = client.db("zap_shift_db");
+    const userCollections = db.collection("users");
     const parcelsCollections = db.collection("parcels");
     const paymentCollections = db.collection("payments");
+    const ridersCollections = db.collection("riders");
+
+    // Users
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      ((user.role = "user"), (user.createdAt = new Date()));
+
+      const userExist = await userCollections.find({ email: user.email });
+      if (userExist) {
+        return res.send({ message: "User exist" });
+      }
+
+      const result = await userCollections.insertOne(user);
+      res.send(result);
+    });
 
     app.get("/parcels", async (req, res) => {
       const query = {};
@@ -221,11 +237,29 @@ async function run() {
         if (email !== req.decoded_email) {
           return res.status(403).send({ message: "Forbidden Access" });
         }
-
       }
 
-      const cursor = paymentCollections.find(query);
+      const cursor = paymentCollections.find(query).sort({ paidAt: -1 });
       const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // Riders Related API
+    app.get("/riders", async (req, res) => {
+      const query = {};
+      if (req.query.status) {
+        query.status = req.query.status;
+      }
+      
+      const cursor = ridersCollections.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.post("/riders", async (req, res) => {
+      const rider = req.body;
+      ((rider.status = "pending"), (rider.createdAt = new Date()));
+      const result = await ridersCollections.insertOne(rider);
       res.send(result);
     });
 

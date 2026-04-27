@@ -32,10 +32,12 @@ const AuthProvider = ({ children }) => {
   };
 
   const handleLogOut = () => {
+    setLoading(true);
     return signOut(auth);
   }
 
   const updateUser = (profile) => {
+    setLoading(true);
     return updateProfile(auth.currentUser, profile)
   }
 
