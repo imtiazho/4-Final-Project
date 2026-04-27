@@ -250,7 +250,7 @@ async function run() {
       if (req.query.status) {
         query.status = req.query.status;
       }
-      
+
       const cursor = ridersCollections.find(query);
       const result = await cursor.toArray();
       res.send(result);
@@ -260,6 +260,37 @@ async function run() {
       const rider = req.body;
       ((rider.status = "pending"), (rider.createdAt = new Date()));
       const result = await ridersCollections.insertOne(rider);
+      res.send(result);
+    });
+
+    app.patch("/riders/:id", verifyFireBaseToken, async (req, res) => {
+      const status = req.body.status;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      const updatedDoc = {
+        $set: {
+          status: status,
+        },
+      };
+
+      const result = await ridersCollections.updateOne(query, updatedDoc);
+
+      if (status === "approved") {
+        const email = req.body.email;
+        const userQuery = { email: email };
+        const updateUser = {
+          $set: {
+            role: "rider",
+          },
+        };
+
+        const userResult = await userCollections.updateOne(
+          userQuery,
+          updateUser,
+        );
+        console.log("User role update result:", userResult);
+      }
       res.send(result);
     });
 

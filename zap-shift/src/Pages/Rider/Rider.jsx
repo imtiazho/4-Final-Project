@@ -3,6 +3,7 @@ import { useForm, useWatch } from "react-hook-form";
 import useAuth from "../../Hooks/useAuth";
 import { useLoaderData, useNavigate } from "react-router";
 import useAxiosSecure from "../../Hooks/useAxiosSecure";
+import Swal from "sweetalert2";
 
 const Rider = () => {
   const {
@@ -28,7 +29,15 @@ const Rider = () => {
   };
 
   const handleBeARider = (data) => {
-    
+    axiosSecure.post("/riders", data).then((res) => {
+      if (res.data.insertedId) {
+        Swal.fire({
+          title: "Deleted!",
+          text: "Your file has been deleted.",
+          icon: "success",
+        });
+      }
+    });
   };
 
   return (
@@ -80,9 +89,7 @@ const Rider = () => {
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-semibold">
-                  Phone No
-                </span>
+                <span className="label-text font-semibold">Phone No</span>
               </label>
               <input
                 type="text"
@@ -143,9 +150,7 @@ const Rider = () => {
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-semibold">
-                  NID
-                </span>
+                <span className="label-text font-semibold">NID</span>
               </label>
               <input
                 type="text"
@@ -157,9 +162,7 @@ const Rider = () => {
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-semibold">
-                  Bike
-                </span>
+                <span className="label-text font-semibold">Bike</span>
               </label>
               <input
                 type="text"
@@ -169,11 +172,11 @@ const Rider = () => {
               />
             </div>
 
-                <input
-                type="submit"
-                value="SUBMIT"
-                className="btn border-none bg-[#c5e76d] hover:bg-[#b3d655] text-emerald-900 normal-case px-10 rounded-lg"
-              />
+            <input
+              type="submit"
+              value="SUBMIT"
+              className="btn border-none bg-[#c5e76d] hover:bg-[#b3d655] text-emerald-900 normal-case px-10 rounded-lg"
+            />
           </div>
         </div>
       </form>
