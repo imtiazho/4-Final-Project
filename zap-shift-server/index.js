@@ -43,8 +43,6 @@ const verifyFireBaseToken = async (req, res, next) => {
   }
 };
 
-
-
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ab3rgue.mongodb.net/?appName=Cluster0`;
 
@@ -69,12 +67,33 @@ async function run() {
     // MiddleWare with database
     const verifyAdminToken = async (req, res, next) => {
       const email = req.decoded_email;
+      const query = { email };
+
+      const user = await userCollections.findOne(query);
+
+      if (!user || user.role !== "admin") {
+        return res.status(403).send({ message: "Forbidden Access" });
+      }
+
       next();
-    }
+    };
 
     // Users
     app.get("/users", verifyFireBaseToken, async (req, res) => {
-      const cursor = userCollections.find();
+      const searchText = req.query.searchText;
+      const query = {};
+      if (searchText) {
+        // query.displayName = { $regex: searchText, $options: "i" }; this a system which is use to find by name only
+        query.$or = [
+          {displayName : { $regex: searchText, $options: "i" }},
+          {email : { $regex: searchText, $options: "i" }},
+        ]
+      }
+
+      const cursor = userCollections
+        .find(query)
+        .limit(5)
+        .sort({ createdAt: -1 });
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -92,19 +111,24 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/users/:id/role", verifyFireBaseToken, verifyAdminToken, async (req, res) => {
-      const id = req.params.id;
-      const role = req.body.role;
-      const query = { _id: new ObjectId(id) };
-      const updatedDoc = {
-        $set: {
-          role: role,
-        },
-      };
+    app.patch(
+      "/users/:id/role",
+      verifyFireBaseToken,
+      verifyAdminToken,
+      async (req, res) => {
+        const id = req.params.id;
+        const role = req.body.role;
+        const query = { _id: new ObjectId(id) };
+        const updatedDoc = {
+          $set: {
+            role: role,
+          },
+        };
 
-      const result = await userCollections.updateOne(query, updatedDoc);
-      res.send(result);
-    });
+        const result = await userCollections.updateOne(query, updatedDoc);
+        res.send(result);
+      },
+    );
 
     app.get("/user/:id", async (req, res) => {});
 

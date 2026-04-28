@@ -11,6 +11,7 @@ const useRole = () => {
     queryFn: async () => {
       const res = await axiosSecure.get(`/users/${user.email}/role`);
       return res.data;
+    //   return res.data.role; // Emn kore send korle jei kahini hoicchilo seta r hobe na!
     },
   });
   
