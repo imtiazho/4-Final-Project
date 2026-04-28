@@ -85,9 +85,9 @@ async function run() {
       if (searchText) {
         // query.displayName = { $regex: searchText, $options: "i" }; this a system which is use to find by name only
         query.$or = [
-          {displayName : { $regex: searchText, $options: "i" }},
-          {email : { $regex: searchText, $options: "i" }},
-        ]
+          { displayName: { $regex: searchText, $options: "i" } },
+          { email: { $regex: searchText, $options: "i" } },
+        ];
       }
 
       const cursor = userCollections
@@ -194,6 +194,7 @@ async function run() {
         mode: "payment",
         metadata: {
           parcelId: paymentInfo.parcelId,
+          deliveryStatus: "pending-pickup",
           parcelName: paymentInfo.parcelName,
         },
         customer_email: paymentInfo.senderEmail,

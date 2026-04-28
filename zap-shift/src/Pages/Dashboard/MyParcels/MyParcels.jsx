@@ -95,7 +95,7 @@ const MyParcels = () => {
                     </button>
                   )}
                 </td>
-                <td>{parcel?.deliverStatus}</td>
+                <td className="uppercase">{parcel?.deliveryStatus}</td>
                 <td className="flex gap-2">
                   <button className="btn btn-primary">Edit</button>
                   <button className="btn btn-primary">View</button>
