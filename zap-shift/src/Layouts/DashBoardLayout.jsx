@@ -3,11 +3,12 @@ import { Link, NavLink, Outlet } from "react-router";
 import { AiOutlineDeliveredProcedure } from "react-icons/ai";
 import { MdDirectionsBike, MdOutlinePayment } from "react-icons/md";
 import { FaMoneyCheckAlt, FaUsers } from "react-icons/fa";
+import { MdOutlineElectricBike } from "react-icons/md";
 import useRole from "../Hooks/useRole";
 
 const DashBoardLayout = () => {
   const { role } = useRole();
-  console.log(role);
+  
   return (
     <div>
       <div className="drawer lg:drawer-open">
@@ -130,6 +131,20 @@ const DashBoardLayout = () => {
 
                       <span className="is-drawer-close:hidden">
                         Users Management
+                      </span>
+                    </NavLink>
+                  </li>
+
+                  <li>
+                    <NavLink
+                      className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                      data-tip="Assign Riders"
+                      to="/dashboard/assign-riders"
+                    >
+                      <MdOutlineElectricBike />
+
+                      <span className="is-drawer-close:hidden">
+                        Assign Riders
                       </span>
                     </NavLink>
                   </li>

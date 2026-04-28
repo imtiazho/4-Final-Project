@@ -48,7 +48,8 @@ const ApproveRiders = () => {
               <th>No</th>
               <th>Name</th>
               <th>Region</th>
-              <th>Status</th>
+              <th>Application Status</th>
+              <th>Work Status</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -59,6 +60,7 @@ const ApproveRiders = () => {
                 <td>{rider.Name}</td>
                 <td>{rider.Region}</td>
                 <td>{rider.status}</td>
+                <td>{rider.workStatus}</td>
                 <td className="flex gap-2">
                   <button
                     onClick={() => handleApproval(rider)}

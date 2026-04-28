@@ -139,11 +139,15 @@ async function run() {
       res.send({ role: user?.role || "user" });
     });
 
+    // Parcels APIs
     app.get("/parcels", async (req, res) => {
       const query = {};
-      const { email } = req.query;
+      const { email, deliveryStatus } = req.query;
       if (email) {
         query.senderEmail = email;
+      }
+      if (deliveryStatus) {
+        query.deliveryStatus = deliveryStatus;
       }
 
       const options = { sort: { createdAt: -1 } };
@@ -308,9 +312,18 @@ async function run() {
 
     // Riders Related API
     app.get("/riders", async (req, res) => {
+      const {status, district, workStatus} = req.query;
       const query = {};
-      if (req.query.status) {
-        query.status = req.query.status;
+      if (status) {
+        query.status = status;
+      }
+      if(district)
+      {
+        query.District = district;
+      }
+      if(workStatus)
+      {
+        query.workStatus = workStatus;
       }
 
       const cursor = ridersCollections.find(query);
@@ -320,7 +333,9 @@ async function run() {
 
     app.post("/riders", async (req, res) => {
       const rider = req.body;
-      ((rider.status = "pending"), (rider.createdAt = new Date()));
+      ((rider.status = "pending"),
+        (rider.createdAt = new Date()),
+        (rider.workStatus = "Not Confirmed"));
       const result = await ridersCollections.insertOne(rider);
       res.send(result);
     });
@@ -333,6 +348,7 @@ async function run() {
       const updatedDoc = {
         $set: {
           status: status,
+          workStatus: "available",
         },
       };
 

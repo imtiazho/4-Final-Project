@@ -28,7 +28,7 @@ const UsersManagement = () => {
       }
     });
   };
-
+  
   const handleRemoveAdmin = (user) => {
     const roleInfo = { role: "user" };
     axiosSecure.patch(`/users/${user._id}/role`, roleInfo).then((res) => {

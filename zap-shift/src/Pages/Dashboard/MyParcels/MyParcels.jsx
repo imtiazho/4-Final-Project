@@ -68,6 +68,7 @@ const MyParcels = () => {
               <th>Cost</th>
               <th>Payment Status</th>
               <th>Delivery Status</th>
+              <th>Tracking ID</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -96,6 +97,7 @@ const MyParcels = () => {
                   )}
                 </td>
                 <td className="uppercase">{parcel?.deliveryStatus}</td>
+                <td className="uppercase">{parcel?.trackingID}</td>
                 <td className="flex gap-2">
                   <button className="btn btn-primary">Edit</button>
                   <button className="btn btn-primary">View</button>
