@@ -73,15 +73,15 @@ const Register = () => {
         displayName: loggedInUser.displayName,
         photoURL: loggedInUser.photoURL,
       };
-      if (loggedInUser) {
-        axiosSecure.post("/users", userInfo).then((res) => {
-          if (res.data.insertedId) {
-            console.log("User inserted in the Database");
-          }
-        });
-      }
+
+      axiosSecure.post("/users", userInfo).then((res) => {
+        if (res.data.insertedId) {
+          console.log("User inserted in the Database");
+        }
+      });
     });
   };
+  
   return (
     <div>
       <form onSubmit={handleSubmit(handleRegistration)}>

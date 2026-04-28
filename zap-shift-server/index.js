@@ -43,6 +43,8 @@ const verifyFireBaseToken = async (req, res, next) => {
   }
 };
 
+
+
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ab3rgue.mongodb.net/?appName=Cluster0`;
 
@@ -64,18 +66,53 @@ async function run() {
     const paymentCollections = db.collection("payments");
     const ridersCollections = db.collection("riders");
 
+    // MiddleWare with database
+    const verifyAdminToken = async (req, res, next) => {
+      const email = req.decoded_email;
+      next();
+    }
+
     // Users
+    app.get("/users", verifyFireBaseToken, async (req, res) => {
+      const cursor = userCollections.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     app.post("/users", async (req, res) => {
       const user = req.body;
       ((user.role = "user"), (user.createdAt = new Date()));
 
-      const userExist = await userCollections.find({ email: user.email });
+      const userExist = await userCollections.findOne({ email: user.email });
       if (userExist) {
         return res.send({ message: "User exist" });
       }
 
       const result = await userCollections.insertOne(user);
       res.send(result);
+    });
+
+    app.patch("/users/:id/role", verifyFireBaseToken, verifyAdminToken, async (req, res) => {
+      const id = req.params.id;
+      const role = req.body.role;
+      const query = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          role: role,
+        },
+      };
+
+      const result = await userCollections.updateOne(query, updatedDoc);
+      res.send(result);
+    });
+
+    app.get("/user/:id", async (req, res) => {});
+
+    app.get("/users/:email/role", async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const user = await userCollections.findOne(query);
+      res.send({ role: user?.role || "user" });
     });
 
     app.get("/parcels", async (req, res) => {
