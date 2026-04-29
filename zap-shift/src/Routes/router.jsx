@@ -19,6 +19,8 @@ import UsersManagement from "../Pages/Dashboard/UsersManagement/UsersManagement"
 import AdminOnlyRoute from "./AdminOnlyRoute";
 import AssignRider from "../Pages/Dashboard/AssignRider/AssignRider";
 import AssignedDeliveries from "../Pages/Dashboard/AssignedDeliveries/AssignedDeliveries";
+import RiderOnlyRoutes from "./RiderOnlyRoutes";
+import CompletedDeliveries from "../Pages/Dashboard/CompletedDeliveries/CompletedDeliveries";
 
 export const router = createBrowserRouter([
   {
@@ -116,9 +118,17 @@ export const router = createBrowserRouter([
       {
         path: "assigned-delivery",
         element: (
-          <PrivateRoute>
+          <RiderOnlyRoutes>
             <AssignedDeliveries></AssignedDeliveries>
-          </PrivateRoute>
+          </RiderOnlyRoutes>
+        ),
+      },
+      {
+        path: "completed-delivery",
+        element: (
+          <RiderOnlyRoutes>
+            <CompletedDeliveries></CompletedDeliveries>
+          </RiderOnlyRoutes>
         ),
       },
     ],

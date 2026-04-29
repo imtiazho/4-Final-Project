@@ -5,6 +5,8 @@ import { MdDirectionsBike, MdOutlinePayment } from "react-icons/md";
 import { FaMoneyCheckAlt, FaTasks, FaUsers } from "react-icons/fa";
 import { MdOutlineElectricBike } from "react-icons/md";
 import { FcAcceptDatabase } from "react-icons/fc";
+import { IoMdDoneAll } from "react-icons/io";
+
 import useRole from "../Hooks/useRole";
 
 const DashBoardLayout = () => {
@@ -117,6 +119,19 @@ const DashBoardLayout = () => {
 
                       <span className="is-drawer-close:hidden">
                         Assigned Deliveries
+                      </span>
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                      data-tip="Completed Deliveries"
+                      to="/dashboard/completed-delivery"
+                    >
+                      <IoMdDoneAll />
+
+                      <span className="is-drawer-close:hidden">
+                        Completed Deliveries
                       </span>
                     </NavLink>
                   </li>

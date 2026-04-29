@@ -156,6 +156,33 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/parcels/rider", async (req, res) => {
+      const { riderEmail, deliveryStatus } = req.query;
+
+      const query = {};
+      if (riderEmail) {
+        query.riderEmail = riderEmail;
+      }
+      if (deliveryStatus !== "parcel_delivered") {
+        query.deliveryStatus = {
+          // $in: [
+          //   "Rider_Assigned",
+          //   "Rider_on_the_way",
+          //   "parcel_delivered",
+          //   "Picked_Up",
+          // ],
+          $nin: ["parcel_delivered"],
+        };
+      }
+      else{
+        query.deliveryStatus = deliveryStatus;
+      }
+
+      const cursor = parcelsCollections.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     app.get("/parcels/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -167,6 +194,33 @@ async function run() {
       const parcel = req.body;
       parcel.createdAt = new Date();
       const result = await parcelsCollections.insertOne(parcel);
+      res.send(result);
+    });
+
+    app.patch("/parcels/:id/status", async (req, res) => {
+      const { deliveryStatus, riderID } = req.body;
+      const query = { _id: new ObjectId(req.params.id) };
+      const updatedDoc = {
+        $set: {
+          deliveryStatus: deliveryStatus,
+        },
+      };
+
+      if (deliveryStatus === "parcel_delivered") {
+        const riderQuery = { _id: new ObjectId(riderID) };
+        const riderUpdatedDoc = {
+          $set: {
+            workStatus: "available",
+          },
+        };
+        const riderResult = await ridersCollections.updateOne(
+          riderQuery,
+          riderUpdatedDoc,
+        );
+      }
+
+
+      const result = await parcelsCollections.updateOne(query, updatedDoc);
       res.send(result);
     });
 
@@ -292,6 +346,7 @@ async function run() {
         const update = {
           $set: {
             paymentStatus: "paid",
+            deliveryStatus: "pending-pickup",
             trackingID: trackingID,
           },
         };
