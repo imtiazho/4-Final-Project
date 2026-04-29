@@ -35,13 +35,14 @@ const AssignRider = () => {
   };
 
   const handleAssignRider = (rider) => {
+    console.log(rider);
     const riderAssignInfo = {
       riderID: rider._id,
-      riderEmail: rider.email,
-      riderName: rider.name,
+      riderEmail: rider.Email,
+      riderName: rider.Name,
       parcelID: selectedParcel._id,
     };
-
+    console.log(riderAssignInfo);
     axiosSecure
       .patch(`/parcels/${selectedParcel._id}`, riderAssignInfo)
       .then((res) => {
