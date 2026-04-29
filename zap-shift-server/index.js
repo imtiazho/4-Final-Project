@@ -170,6 +170,37 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/parcels/:id", async (req, res) => {
+      const { riderID, riderName, riderEmail } = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      const updatedDoc = {
+        $set: {
+          deliveryStatus: "Rider_Assigned",
+          riderID: riderID,
+          riderName: riderName,
+          riderEmail: riderEmail,
+        },
+      };
+
+      const result = await parcelsCollections.updateOne(query, updatedDoc);
+
+      // Update Rider
+      const riderQuery = { _id: new ObjectId(riderID) };
+      const riderUpdatedDoc = {
+        $set: {
+          workStatus: "In_Transit",
+        },
+      };
+      const riderResult = await ridersCollections.updateOne(
+        riderQuery,
+        riderUpdatedDoc,
+      );
+
+      res.send(riderResult);
+    });
+
     app.delete("/parcels/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -312,17 +343,15 @@ async function run() {
 
     // Riders Related API
     app.get("/riders", async (req, res) => {
-      const {status, district, workStatus} = req.query;
+      const { status, district, workStatus } = req.query;
       const query = {};
       if (status) {
         query.status = status;
       }
-      if(district)
-      {
+      if (district) {
         query.District = district;
       }
-      if(workStatus)
-      {
+      if (workStatus) {
         query.workStatus = workStatus;
       }
 

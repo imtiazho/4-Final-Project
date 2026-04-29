@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import React, { useRef, useState } from "react";
 import useAxiosSecure from "../../../Hooks/useAxiosSecure";
+import Swal from "sweetalert2";
 
 const AssignRider = () => {
   const [selectedParcel, setSelectedParcel] = useState(null);
   const axiosSecure = useAxiosSecure();
   const modalRef = useRef();
-  const { data: parcels = [] } = useQuery({
+  const {refetch: parcelRefetch, data: parcels = [] } = useQuery({
     queryKey: ["parcels", "pending-pickup"],
     queryFn: async () => {
       const res = await axiosSecure.get(
@@ -16,6 +17,7 @@ const AssignRider = () => {
     },
   });
 
+  // Todo: Invalidate query after assign rider
   const { data: riders = [] } = useQuery({
     queryKey: ["riders", selectedParcel?.senderDistrict, "available"],
     enabled: !!selectedParcel,
@@ -40,7 +42,19 @@ const AssignRider = () => {
       parcelID: selectedParcel._id,
     };
 
-    axiosSecure.patch(``, riderAssignInfo);
+    axiosSecure
+      .patch(`/parcels/${selectedParcel._id}`, riderAssignInfo)
+      .then((res) => {
+        if (res.data.modifiedCount) {
+          modalRef.current.close();
+          parcelRefetch();
+          Swal.fire({
+            title: "Updated!",
+            text: `Rider has been assigned.`,
+            icon: "success",
+          });
+        }
+      });
   };
 
   return (
