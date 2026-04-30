@@ -203,13 +203,34 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/parcels/delivery-status/stats", async (req, res) => {
+      const pipeline = [
+        {
+          $group: {
+            _id: "$deliveryStatus",
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $project: {
+            status: "$_id",
+            count: 1,
+            // _id: 0 // jodi na paite chai 0 or prite chaile 1
+          },
+        },
+      ];
+
+      const result = await parcelsCollections.aggregate(pipeline).toArray();
+      res.send(result);
+    });
+
     app.post("/parcels", async (req, res) => {
       const parcel = req.body;
       const trackingID = generateTrackingId();
       parcel.createdAt = new Date();
       parcel.trackingID = trackingID;
 
-      logTracking(trackingID, "Parcel-Created")
+      logTracking(trackingID, "Parcel-Created");
       const result = await parcelsCollections.insertOne(parcel);
       res.send(result);
     });
@@ -365,7 +386,7 @@ async function run() {
       // Use the prev tracking id
       // const trackingID = generateTrackingId();
 
-      // We retrive the data from session 
+      // We retrive the data from session
       const trackingID = session.metadata.trackingID;
       if (session.payment_status == "paid") {
         const id = session.metadata.parcelId;
@@ -442,6 +463,56 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/riders/delivery-per-day", async (req, res) => {
+      const email = req.query.email;
+      // Aggregate on parcel
+      const pipeline = [
+        {
+          $match: {
+            riderEmail: email,
+            deliveryStatus: "parcel_delivered",
+          },
+        },
+        {
+          $lookup: {
+            from: "trackings",
+            localField: "trackingID",
+            foreignField: "trackingID",
+            as: "parcels_trackings",
+          },
+        },
+        {
+          $unwind: "$parcels_trackings",
+        },
+        {
+          $match: {
+            "parcels_trackings.status": "parcel_delivered",
+          },
+        },
+        {
+          // convert timestamp to YYYY-MM-DD string
+          $addFields: {
+            deliveryDay: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$parcels_trackings.createdAt",
+              },
+            },
+          },
+        },
+        {
+          // group by date
+          $group: {
+            _id: "$deliveryDay",
+            deliveredCount: { $sum: 1 },
+          },
+        },
+      ];
+
+      const result = await parcelsCollections.aggregate(pipeline).toArray();
+      res.send(result);
+    });
+
     app.post("/riders", async (req, res) => {
       const rider = req.body;
       ((rider.status = "pending"),
@@ -484,22 +555,11 @@ async function run() {
     });
 
     // Tracking related APIS
-    // app.get("/trackings/:trackingID", async (req, res) => {
-    //   const tID = req.params.trackingID;
-    //   const query = {trackingID : tID};
-    //   console.log("Searching for ID:", tID);
-    //   const cursor = trackingsCollections.find(query);
-    //   const result = await cursor.toArray();
-    //   res.send(result);
-    //   // const result = await trackingsCollections.find(query).toArray();
-    //   // res.send(result);
-    // })
-
     app.get("/trackings/:tId", async (req, res) => {
-      const cursor = trackingsCollections.find({trackingID: req.params.tId});
+      const cursor = trackingsCollections.find({ trackingID: req.params.tId });
       const result = await cursor.toArray();
       res.send(result);
-    })
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
