@@ -7,7 +7,7 @@ const AssignRider = () => {
   const [selectedParcel, setSelectedParcel] = useState(null);
   const axiosSecure = useAxiosSecure();
   const modalRef = useRef();
-  const {refetch: parcelRefetch, data: parcels = [] } = useQuery({
+  const { refetch: parcelRefetch, data: parcels = [] } = useQuery({
     queryKey: ["parcels", "pending-pickup"],
     queryFn: async () => {
       const res = await axiosSecure.get(
@@ -41,8 +41,9 @@ const AssignRider = () => {
       riderEmail: rider.Email,
       riderName: rider.Name,
       parcelID: selectedParcel._id,
+      trackingID: selectedParcel.trackingID,
     };
-    console.log(riderAssignInfo);
+    // console.log(riderAssignInfo);
     axiosSecure
       .patch(`/parcels/${selectedParcel._id}`, riderAssignInfo)
       .then((res) => {

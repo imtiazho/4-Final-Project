@@ -19,7 +19,11 @@ const AssignedDeliveries = () => {
   });
 
   const handleAcceptDelivery = (parcel) => {
-    const statusInfo = { deliveryStatus: "Rider_on_the_way" };
+    const statusInfo = {
+      deliveryStatus: "Rider_on_the_way",
+      riderID: parcel.riderID,
+      trackingID: parcel.trackingID,
+    };
     axiosSecure
       .patch(`/parcels/${parcel._id}/status`, statusInfo)
       .then((res) => {
@@ -35,7 +39,12 @@ const AssignedDeliveries = () => {
   };
 
   const handleMarkedPickedUp = (parcel) => {
-    const statusInfo = { deliveryStatus: "Picked_Up" };
+    const statusInfo = {
+      deliveryStatus: "Picked_Up",
+      riderID: parcel.riderID,
+      trackingID: parcel.trackingID,
+    };
+
     axiosSecure
       .patch(`/parcels/${parcel._id}/status`, statusInfo)
       .then((res) => {
@@ -51,7 +60,12 @@ const AssignedDeliveries = () => {
   };
 
   const handleMarkedDelivered = (parcel) => {
-    const statusInfo = { deliveryStatus: "parcel_delivered", riderID: parcel.riderID };
+    const statusInfo = {
+      deliveryStatus: "parcel_delivered",
+      riderID: parcel.riderID,
+      trackingID: parcel.trackingID,
+    };
+
     axiosSecure
       .patch(`/parcels/${parcel._id}/status`, statusInfo)
       .then((res) => {

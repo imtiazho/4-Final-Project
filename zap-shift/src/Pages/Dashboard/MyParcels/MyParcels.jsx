@@ -49,11 +49,12 @@ const MyParcels = () => {
       parcelId: parcel._id,
       senderEmail: parcel.senderEmail,
       parcelName: parcel.parcelName,
-    }
+      trackingID: parcel.trackingID,
+    };
 
     const res = await axiosSecure.post("/payment-checkout", paymentInfo);
     window.location.href = res.data.url;
-  }
+  };
 
   return (
     <div>
@@ -89,7 +90,7 @@ const MyParcels = () => {
                     //   Pay Now
                     // </Link>
                     <button
-                    onClick={() => handlePayment(parcel)}
+                      onClick={() => handlePayment(parcel)}
                       className="btn btn-primary"
                     >
                       Pay Now
@@ -97,7 +98,11 @@ const MyParcels = () => {
                   )}
                 </td>
                 <td className="uppercase">{parcel?.deliveryStatus}</td>
-                <td className="uppercase">{parcel?.trackingID}</td>
+                <td className="uppercase">
+                  <Link to={`/track-parcel/${parcel.trackingID}`}>
+                    {parcel?.trackingID}
+                  </Link>
+                </td>
                 <td className="flex gap-2">
                   <button className="btn btn-primary">Edit</button>
                   <button className="btn btn-primary">View</button>
