@@ -392,7 +392,7 @@ async function run() {
         if (session.payment_status === "paid") {
           const resPay = await paymentCollections.insertOne(paymentHistory);
           logTracking(trackingID, "pending-pickup");
-          res.send({
+          return res.send({
             success: true,
             modifyParcel: result,
             trackingID: trackingID,
@@ -402,7 +402,7 @@ async function run() {
         }
       }
 
-      res.send({ success: false });
+      return res.send({ success: false });
     });
 
     //
